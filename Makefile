@@ -1,7 +1,7 @@
 LIBS_DIR := ./libs
 
 .PHONY: dependencies
-dependencies: boost gmp
+dependencies: boost gmp mpfr
 
 $(LIBS_DIR):
 	mkdir -p $@
@@ -34,3 +34,19 @@ $(LIBS_DIR)/gpm-6.1.2/source: $(LIBS_DIR)/gpm-6.1.2.tar.bz2
 
 $(LIBS_DIR)/gpm-6.1.2.tar.bz2: $(LIBS_DIR)
 	curl -L https://gmplib.org/download/gmp/gmp-6.1.2.tar.bz2 >> $@
+
+.PHONY: mpfr
+mpfr: $(LIBS_DIR)/mpfr-4.0.1/out
+
+$(LIBS_DIR)/mpfr-4.0.1/out: $(LIBS_DIR)/mpfr-4.0.1/source
+	prefix=$$(python -c "from os.path import abspath; print(abspath(\"$@\"))"); gmp=$$(python -c "from os.path import abspath; print(abspath(\"$(LIBS_DIR)/gpm-6.1.2/out\"))"); cd $<; ./configure --prefix=$$prefix --with-gmp=$$gmp
+	cd $<; make
+	cd $<; make install
+
+$(LIBS_DIR)/mpfr-4.0.1/source: $(LIBS_DIR)/mpfr-4.0.1.tar.gz
+	mkdir -p $@
+	tar -xzf $< -C $@ --strip-components=1
+
+$(LIBS_DIR)/mpfr-4.0.1.tar.gz: $(LIBS_DIR)
+	curl -L https://www.mpfr.org/mpfr-current/mpfr-4.0.1.tar.gz >> $@
+

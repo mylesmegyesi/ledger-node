@@ -11,7 +11,7 @@
       "<!(echo $HOMEBREW_PREFIX)/Cellar/ledger/3.1.1_11/include/",
       "./libs/boost_1_67_0/out/include/",
       "./libs/gpm-6.1.2/out/include/",
-      "<!(echo $HOMEBREW_PREFIX)/Cellar/mpfr/4.0.1/include/",
+      "./libs/mpfr-4.0.1/out/include/",
       "<!(echo $HOMEBREW_PREFIX)/Cellar/python@2/2.7.15_1/Frameworks/Python.framework/Versions/2.7/include/python2.7/",
       "../ledger/lib/utfcpp/source/",
     ],
