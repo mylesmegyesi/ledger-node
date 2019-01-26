@@ -9,8 +9,8 @@
     "include_dirs": [
       "<!@(node -p \"require('node-addon-api').include\")",
       "<!(echo $HOMEBREW_PREFIX)/Cellar/ledger/3.1.1_11/include/",
-      "./libs/boost/boost_1_67_0/out/include/",
-      "<!(echo $HOMEBREW_PREFIX)/Cellar/gmp/6.1.2_2/include/",
+      "./libs/boost_1_67_0/out/include/",
+      "./libs/gpm-6.1.2/out/include/",
       "<!(echo $HOMEBREW_PREFIX)/Cellar/mpfr/4.0.1/include/",
       "<!(echo $HOMEBREW_PREFIX)/Cellar/python@2/2.7.15_1/Frameworks/Python.framework/Versions/2.7/include/python2.7/",
       "../ledger/lib/utfcpp/source/",
@@ -20,7 +20,7 @@
       "-lledger.3",
       "-L<!(echo $HOMEBREW_PREFIX)/Cellar/python@2/2.7.15_1/Frameworks/Python.framework/Versions/2.7/lib/",
       "-lpython2.7",
-      "-L<(module_root_dir)/libs/boost/boost_1_67_0/out/lib/",
+      "-L<(module_root_dir)/libs/boost_1_67_0/out/lib/",
       "-L<!(echo $HOMEBREW_PREFIX)/Cellar/boost-python/1.68.0/lib/"
     ],
     "dependencies": [
