@@ -1,4 +1,4 @@
-const testAddon = require("../../build/Release/testaddon.node");
+const testAddon = require("../../build/Release/ledger.node");
 
 const EXAMPLE_JOURNAL = `
 ; -*- ledger -*-
