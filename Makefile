@@ -4,6 +4,10 @@ RELEASE_DIR := ./build/Release
 .PHONY: default
 default: ledger-node
 
+.PHONY: type-check
+type-check:
+	npx tsc
+
 ledger-node: | $(RELEASE_DIR)/ledger.node $(RELEASE_DIR)/libledger.3.dylib
 	install_name_tool -change libledger.3.dylib "@loader_path/libledger.3.dylib" $<
 

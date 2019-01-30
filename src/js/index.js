@@ -1,4 +1,4 @@
-const testAddon = require("../../build/Release/ledger.node");
+const ledger = require("../../build/Release/ledger.node");
 
 const EXAMPLE_JOURNAL = `
 ; -*- ledger -*-
@@ -73,5 +73,6 @@ end tag
 end tag
 `;
 
-console.log(testAddon.parseJournal(EXAMPLE_JOURNAL));
-module.exports = testAddon;
+console.log(ledger.parseJournal(EXAMPLE_JOURNAL));
+
+module.exports = ledger;
