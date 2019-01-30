@@ -2,60 +2,60 @@ LIBS_DIR := ./libs
 RELEASE_DIR := ./build/Release
 
 .PHONY: default
-default: ledger-node
+default: all
 
 .PHONY: type-check
 type-check:
 	npx tsc
 
-ledger-node: | $(RELEASE_DIR)/ledger.node $(RELEASE_DIR)/libledger.3.dylib
-	install_name_tool -change libledger.3.dylib "@loader_path/libledger.3.dylib" $<
+.PHONY: type-check
+all: | ledger ledger-node
 
-$(RELEASE_DIR):
-	mkdir -p $@
+ledger-node: | $(RELEASE_DIR)/ledger.node $(RELEASE_DIR)/libledger.3.dylib
 
 $(RELEASE_DIR)/ledger.node:
 	npx node-gyp rebuild
+	install_name_tool -change libledger.3.dylib "@loader_path/libledger.3.dylib" $(RELEASE_DIR)/ledger.node
 
-$(RELEASE_DIR)/libboost_date_time-mt.dylib: $(RELEASE_DIR) boost
-	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_date_time-mt.dylib $<
+$(RELEASE_DIR)/libboost_date_time-mt.dylib:
+	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_date_time-mt.dylib $(RELEASE_DIR)
 
-$(RELEASE_DIR)/libboost_system-mt.dylib: $(RELEASE_DIR) boost
-	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_system-mt.dylib $<
+$(RELEASE_DIR)/libboost_system-mt.dylib:
+	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_system-mt.dylib $(RELEASE_DIR)
 
-$(RELEASE_DIR)/libboost_iostreams-mt.dylib: $(RELEASE_DIR) boost
-	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_iostreams-mt.dylib $<
+$(RELEASE_DIR)/libboost_iostreams-mt.dylib:
+	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_iostreams-mt.dylib $(RELEASE_DIR)
 
-$(RELEASE_DIR)/libboost_regex-mt.dylib: $(RELEASE_DIR) boost
-	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_regex-mt.dylib $<
+$(RELEASE_DIR)/libboost_regex-mt.dylib:
+	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_regex-mt.dylib $(RELEASE_DIR)
 
-$(RELEASE_DIR)/libboost_chrono-mt.dylib: $(RELEASE_DIR) boost $(RELEASE_DIR)/libboost_system-mt.dylib
-	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_chrono-mt.dylib $<
+$(RELEASE_DIR)/libboost_chrono-mt.dylib:
+	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_chrono-mt.dylib $(RELEASE_DIR)
 	install_name_tool -change libboost_system-mt.dylib "@loader_path/libboost_system-mt.dylib" $@
 
-$(RELEASE_DIR)/libboost_filesystem-mt.dylib: $(RELEASE_DIR) boost $(RELEASE_DIR)/libboost_system-mt.dylib
-	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_filesystem-mt.dylib $<
+$(RELEASE_DIR)/libboost_filesystem-mt.dylib: $(RELEASE_DIR)/libboost_system-mt.dylib
+	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_filesystem-mt.dylib $(RELEASE_DIR)
 	install_name_tool -change libboost_system-mt.dylib "@loader_path/libboost_system-mt.dylib" $@
 
-$(RELEASE_DIR)/libboost_timer-mt.dylib: $(RELEASE_DIR) boost $(RELEASE_DIR)/libboost_system-mt.dylib $(RELEASE_DIR)/libboost_chrono-mt.dylib
-	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_timer-mt.dylib $<
+$(RELEASE_DIR)/libboost_timer-mt.dylib: $(RELEASE_DIR)/libboost_system-mt.dylib $(RELEASE_DIR)/libboost_chrono-mt.dylib
+	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_timer-mt.dylib $(RELEASE_DIR)
 	install_name_tool -change libboost_system-mt.dylib "@loader_path/libboost_system-mt.dylib" $@
 	install_name_tool -change libboost_chrono-mt.dylib "@loader_path/libboost_chrono-mt.dylib" $@
 
-$(RELEASE_DIR)/libboost_unit_test_framework-mt.dylib: $(RELEASE_DIR) boost $(RELEASE_DIR)/libboost_system-mt.dylib $(RELEASE_DIR)/libboost_timer-mt.dylib
-	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_unit_test_framework-mt.dylib $<
+$(RELEASE_DIR)/libboost_unit_test_framework-mt.dylib: $(RELEASE_DIR)/libboost_system-mt.dylib $(RELEASE_DIR)/libboost_timer-mt.dylib
+	cp $(LIBS_DIR)/boost-1.67.0/out/lib/libboost_unit_test_framework-mt.dylib $(RELEASE_DIR)
 	install_name_tool -change libboost_system-mt.dylib "@loader_path/libboost_system-mt.dylib" $@
 	install_name_tool -change libboost_timer-mt.dylib "@loader_path/libboost_timer-mt.dylib" $@
 
-$(RELEASE_DIR)/libgmp.10.dylib: $(RELEASE_DIR) gmp
-	cp $(LIBS_DIR)/gmp-6.1.2/out/lib/libgmp.10.dylib $<
+$(RELEASE_DIR)/libgmp.10.dylib:
+	cp $(LIBS_DIR)/gmp-6.1.2/out/lib/libgmp.10.dylib $(RELEASE_DIR)
 
-$(RELEASE_DIR)/libmpfr.6.dylib: $(RELEASE_DIR) mpfr $(RELEASE_DIR)/libgmp.10.dylib
-	cp $(LIBS_DIR)/mpfr-4.0.1/out/lib/libmpfr.6.dylib $<
+$(RELEASE_DIR)/libmpfr.6.dylib: $(RELEASE_DIR)/libgmp.10.dylib
+	cp $(LIBS_DIR)/mpfr-4.0.1/out/lib/libmpfr.6.dylib $(RELEASE_DIR)
 	install_name_tool -change libgmp.10.dylib "@loader_path/libgmp.10.dylib" $@
 
-$(RELEASE_DIR)/libledger.3.dylib: $(RELEASE_DIR) ledger $(RELEASE_DIR)/libboost_date_time-mt.dylib $(RELEASE_DIR)/libboost_system-mt.dylib $(RELEASE_DIR)/libboost_iostreams-mt.dylib $(RELEASE_DIR)/libboost_regex-mt.dylib $(RELEASE_DIR)/libboost_filesystem-mt.dylib  $(RELEASE_DIR)/libboost_unit_test_framework-mt.dylib $(RELEASE_DIR)/libgmp.10.dylib $(RELEASE_DIR)/libmpfr.6.dylib
-	cp $(LIBS_DIR)/ledger-3.1.1/out/lib/libledger.3.dylib $<
+$(RELEASE_DIR)/libledger.3.dylib: $(RELEASE_DIR)/libboost_date_time-mt.dylib $(RELEASE_DIR)/libboost_system-mt.dylib $(RELEASE_DIR)/libboost_iostreams-mt.dylib $(RELEASE_DIR)/libboost_regex-mt.dylib $(RELEASE_DIR)/libboost_filesystem-mt.dylib  $(RELEASE_DIR)/libboost_unit_test_framework-mt.dylib $(RELEASE_DIR)/libgmp.10.dylib $(RELEASE_DIR)/libmpfr.6.dylib
+	cp $(LIBS_DIR)/ledger-3.1.1/out/lib/libledger.3.dylib $(RELEASE_DIR)
 	install_name_tool -change libboost_date_time-mt.dylib "@loader_path/libboost_date_time-mt.dylib" $@
 	install_name_tool -change libboost_filesystem-mt.dylib "@loader_path/libboost_filesystem-mt.dylib" $@
 	install_name_tool -change libboost_system-mt.dylib "@loader_path/libboost_system-mt.dylib" $@
