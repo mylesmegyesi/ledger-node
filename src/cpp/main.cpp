@@ -10,15 +10,15 @@ Napi::Object ParseJournalWrapped(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
 	// Parse the Journal using Ledger
-	// TODO: Free these resources
   std::string journal_string = info[0].As<Napi::String>().Utf8Value();
   ledger::parse_context_stack_t parsing_context_stack;
   boost::shared_ptr<std::istream> stream(new std::istringstream(journal_string));
 	ledger::parse_context_t context = ledger::parse_context_t(stream, boost::filesystem::current_path());
   ledger::journal_t* journal = new ledger::journal_t();
+  ledger::scope_t* scope = new ledger::empty_scope_t()
   context.journal = journal;
   context.master = journal->master;
-  context.scope = new ledger::empty_scope_t();
+  context.scope = scope;
   parsing_context_stack.push(context);
 	journal->read(parsing_context_stack);
 	// *****
@@ -34,6 +34,11 @@ Napi::Object ParseJournalWrapped(const Napi::CallbackInfo& info) {
 		transactions[(int)std::distance(xacts.begin(), it)] = transaction;
 	}
   parsed_journal.Set("transactions", transactions);
+
+  delete journal;
+  delete scope;
+  delete stream;
+
   return parsed_journal;
 }
 
