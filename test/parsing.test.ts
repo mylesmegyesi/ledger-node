@@ -1,4 +1,4 @@
-import { parseJournal } from "../src/js/"
+import { parseJournal, TransactionState } from "../src/js/"
 
 describe("Parsing the Journal file", () => {
   it("parses the transaction payee", () => {
@@ -73,5 +73,41 @@ describe("Parsing the Journal file", () => {
 
     expect(date).toEqual("2010/12/01");
     expect(auxDate).toBeNull();
+  });
+
+  it("parses the uncleared transaction state", () => {
+    const journalStr = `
+2010/12/01 Checking balance
+  Assets:Checking                   $1,000.00
+  Equity:Opening Balances
+`;
+
+    const {transactions: [{state}]} = parseJournal(journalStr);
+
+    expect(state).toEqual(TransactionState.UNCLEARED);
+  });
+
+  it("parses the pending transaction state", () => {
+    const journalStr = `
+2010/12/01 ! Checking balance
+  Assets:Checking                   $1,000.00
+  Equity:Opening Balances
+`;
+
+    const {transactions: [{state}]} = parseJournal(journalStr);
+
+    expect(state).toEqual(TransactionState.PENDING);
+  });
+
+  it("parses the cleared transaction state", () => {
+    const journalStr = `
+2010/12/01 * Checking balance
+  Assets:Checking                   $1,000.00
+  Equity:Opening Balances
+`;
+
+    const {transactions: [{state}]} = parseJournal(journalStr);
+
+    expect(state).toEqual(TransactionState.CLEARED);
   });
 });
