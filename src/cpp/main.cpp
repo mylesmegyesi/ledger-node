@@ -39,6 +39,7 @@ Napi::Object ParseJournalWrapped(const Napi::CallbackInfo &info) {
                         aux_date ? Napi::String::New(env, ledger::format_date(*aux_date, ledger::FMT_WRITTEN))
                                  : env.Null());
         transaction.Set("state", Napi::String::New(env, xact.state() == ledger::item_t::CLEARED ? "CLEARED" : xact.state() == ledger::item_t::PENDING ? "PENDING" : "UNCLEARED"));
+        transaction.Set("note", xact.note ? Napi::String::New(env, *xact.note) : env.Null());
         transactions[(int) std::distance(xacts.begin(), it)] = transaction;
     }
     parsed_journal.Set("transactions", transactions);

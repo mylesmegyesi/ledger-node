@@ -110,4 +110,43 @@ describe("Parsing the Journal file", () => {
 
     expect(state).toEqual(TransactionState.CLEARED);
   });
+
+  it("parses the transaction note on the payee line", () => {
+    const journalStr = `
+2012-03-10 * KFC                ; yum, chicken...
+  Expenses:Food                $20.00
+  Assets:Cash
+`;
+
+    const {transactions: [{note}]} = parseJournal(journalStr);
+
+    expect(note).toEqual(" yum, chicken...");
+  });
+
+  it("parses the transaction note on the next line", () => {
+    const journalStr = `
+2012-03-10 * KFC
+  ; and more notes...
+  Expenses:Food                $20.00
+  Assets:Cash
+`;
+
+    const {transactions: [{note}]} = parseJournal(journalStr);
+
+    expect(note).toEqual(" and more notes...");
+  });
+
+  it("parses the transaction note on both lines", () => {
+    const journalStr = `
+2012-03-10 * KFC                ; yum, chicken...
+  ; and more notes...
+  ; and even more notes...
+  Expenses:Food                $20.00
+  Assets:Cash
+`;
+
+    const {transactions: [{note}]} = parseJournal(journalStr);
+
+    expect(note).toEqual(" yum, chicken...\n and more notes...\n and even more notes...");
+  });
 });

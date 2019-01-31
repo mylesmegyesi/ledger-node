@@ -9,7 +9,8 @@ export type Transaction = {
   code: number | null,
   date: string,
   auxDate: string | null,
-  state: TransactionState
+  state: TransactionState,
+  note: string | null
 }
 
 export function parseJournal(journal: string): Journal;
