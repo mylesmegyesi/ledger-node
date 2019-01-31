@@ -1,4 +1,4 @@
-import {parseJournal} from "../src/js/"
+import { parseJournal } from "../src/js/"
 
 describe("Parsing the Journal file", () => {
   it("parses the transaction payee", () => {
@@ -35,5 +35,43 @@ describe("Parsing the Journal file", () => {
     const {transactions: [{code}]} = parseJournal(journalStr);
 
     expect(code).toEqual("101");
+  });
+
+  it("parses the date", () => {
+    const journalStr = `
+2010/12/01 * Checking balance
+  Assets:Checking                   $1,000.00
+  Equity:Opening Balances
+`;
+
+    const {transactions: [{date}]} = parseJournal(journalStr);
+
+    expect(date).toEqual("2010/12/01");
+  });
+
+  it("parses the auxiliary date", () => {
+    const journalStr = `
+2010/12/01=2010/12/02 * Checking balance
+  Assets:Checking                   $1,000.00
+  Equity:Opening Balances
+`;
+
+    const {transactions: [{date, auxDate}]} = parseJournal(journalStr);
+
+    expect(date).toEqual("2010/12/01");
+    expect(auxDate).toEqual("2010/12/02");
+  });
+
+  it("parses the auxiliary date to null when it does not exist", () => {
+    const journalStr = `
+2010/12/01 * Checking balance
+  Assets:Checking                   $1,000.00
+  Equity:Opening Balances
+`;
+
+    const {transactions: [{date, auxDate}]} = parseJournal(journalStr);
+
+    expect(date).toEqual("2010/12/01");
+    expect(auxDate).toBeNull();
   });
 });

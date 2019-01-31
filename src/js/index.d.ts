@@ -6,6 +6,8 @@ export type Journal = {
 export type Transaction = {
   payee: string;
   code: number | null;
+  date: string;
+  auxDate: string | null;
 }
 
 export function parseJournal(journal: string): Journal;

@@ -11,7 +11,11 @@ type-check:
 .PHONY: type-check
 all: | ledger ledger-node
 
-ledger-node: | $(RELEASE_DIR)/ledger.node $(RELEASE_DIR)/libledger.3.dylib
+ledger-node: | clean-ledger-node $(RELEASE_DIR)/ledger.node $(RELEASE_DIR)/libledger.3.dylib
+
+.PHONY: clean-ledger-node
+clean-ledger-node:
+	rm -f $(RELEASE_DIR)/ledger.node
 
 $(RELEASE_DIR)/ledger.node:
 	npx node-gyp rebuild
