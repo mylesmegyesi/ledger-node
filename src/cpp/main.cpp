@@ -38,8 +38,34 @@ Napi::Object ParseJournalWrapped(const Napi::CallbackInfo &info) {
         transaction.Set("auxDate",
                         aux_date ? Napi::String::New(env, ledger::format_date(*aux_date, ledger::FMT_WRITTEN))
                                  : env.Null());
-        transaction.Set("state", Napi::String::New(env, xact.state() == ledger::item_t::CLEARED ? "CLEARED" : xact.state() == ledger::item_t::PENDING ? "PENDING" : "UNCLEARED"));
+        transaction.Set("state", Napi::String::New(env,
+                                                   xact.state() == ledger::item_t::CLEARED ? "CLEARED" : xact.state() ==
+                                                                                                         ledger::item_t::PENDING
+                                                                                                         ? "PENDING"
+                                                                                                         : "UNCLEARED"));
         transaction.Set("note", xact.note ? Napi::String::New(env, *xact.note) : env.Null());
+
+        std::vector<std::string> tags_vec;
+        Napi::Object metadata = Napi::Object::New(env);
+        if (xact.metadata) {
+            for (ledger::item_t::string_map::value_type pair : *xact.metadata) {
+                if (pair.second.first) { // is metadata
+                    std::ostringstream value;
+                    value << *pair.second.first;
+                    metadata.Set(pair.first, Napi::String::New(env, value.str()));
+                } else { // is tag
+                    tags_vec.push_back(pair.first);
+                }
+            }
+        }
+
+        Napi::Array tags = Napi::Array::New(env, tags_vec.size());
+        for (std::vector<std::string>::iterator it = tags_vec.begin(); it != tags_vec.end(); ++it) {
+            tags[(int) std::distance(tags_vec.begin(), it)] = Napi::String::New(env, *it);
+        }
+        transaction.Set("tags", tags);
+        transaction.Set("metadata", metadata);
+
         transactions[(int) std::distance(xacts.begin(), it)] = transaction;
     }
     parsed_journal.Set("transactions", transactions);

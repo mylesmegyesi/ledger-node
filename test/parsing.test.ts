@@ -149,4 +149,35 @@ describe("Parsing the Journal file", () => {
 
     expect(note).toEqual(" yum, chicken...\n and more notes...\n and even more notes...");
   });
+
+  it("parses transaction tags", () => {
+    const journalStr = `
+2010/12/01 * Checking balance
+  ; :TAG1:TAG2:TAG3:tag4:
+  Assets:Checking                   $1,000.00
+  Equity:Opening Balances
+`;
+
+    const {transactions: [{tags, metadata}]} = parseJournal(journalStr);
+
+    expect(tags).toEqual(["TAG1", "TAG2", "TAG3", "tag4"]);
+  });
+
+  it("parses transaction metadata", () => {
+    const journalStr = `
+2010/12/01 * Checking balance  ; tag1: tag1 value
+  ; MyTag: This is just a bogus value for MyTag
+  ; tag2: tag2 value
+  Assets:Checking                   $1,000.00
+  Equity:Opening Balances
+`;
+
+    const {transactions: [{metadata}]} = parseJournal(journalStr);
+
+    expect(metadata).toEqual({
+      "MyTag": "This is just a bogus value for MyTag",
+      "tag1": "tag1 value",
+      "tag2": "tag2 value",
+    });
+  })
 });

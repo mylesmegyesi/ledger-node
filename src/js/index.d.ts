@@ -10,7 +10,9 @@ export type Transaction = {
   date: string,
   auxDate: string | null,
   state: TransactionState,
-  note: string | null
+  note: string | null,
+  tags: string[],
+  metadata: {[key: string]: string}
 }
 
 export function parseJournal(journal: string): Journal;
