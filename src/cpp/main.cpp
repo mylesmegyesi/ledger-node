@@ -6,6 +6,8 @@
 #include <ledger/journal.h>
 #include <ledger/xact.h>
 #include <ledger/times.h>
+#include <ledger/post.h>
+#include <ledger/account.h>
 
 Napi::Object ParseJournalWrapped(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
@@ -28,27 +30,28 @@ Napi::Object ParseJournalWrapped(const Napi::CallbackInfo &info) {
     Napi::Object parsed_journal = Napi::Object::New(env);
     ledger::xacts_list xacts = journal->xacts;
     Napi::Array transactions = Napi::Array::New(env, xacts.size());
-    for (std::list<ledger::xact_t *>::iterator it = xacts.begin(); it != xacts.end(); ++it) {
-        ledger::xact_t xact = **it;
+    for (std::list<ledger::xact_t *>::iterator xact_it = xacts.begin(); xact_it != xacts.end(); ++xact_it) {
+        ledger::xact_t *xact = *xact_it;
         Napi::Object transaction = Napi::Object::New(env);
-        transaction.Set("payee", Napi::String::New(env, xact.payee));
-        transaction.Set("code", xact.code ? Napi::String::New(env, *xact.code) : env.Null());
-        transaction.Set("date", Napi::String::New(env, ledger::format_date(xact.primary_date(), ledger::FMT_WRITTEN)));
-        boost::optional <ledger::date_t> aux_date = xact.aux_date();
+        transaction.Set("payee", Napi::String::New(env, xact->payee));
+        transaction.Set("code", xact->code ? Napi::String::New(env, *xact->code) : env.Null());
+        transaction.Set("date", Napi::String::New(env, ledger::format_date(xact->primary_date(), ledger::FMT_WRITTEN)));
+        boost::optional <ledger::date_t> aux_date = xact->aux_date();
         transaction.Set("auxDate",
                         aux_date ? Napi::String::New(env, ledger::format_date(*aux_date, ledger::FMT_WRITTEN))
                                  : env.Null());
         transaction.Set("state", Napi::String::New(env,
-                                                   xact.state() == ledger::item_t::CLEARED ? "CLEARED" : xact.state() ==
-                                                                                                         ledger::item_t::PENDING
-                                                                                                         ? "PENDING"
-                                                                                                         : "UNCLEARED"));
-        transaction.Set("note", xact.note ? Napi::String::New(env, *xact.note) : env.Null());
+                                                   xact->state() == ledger::item_t::CLEARED ? "CLEARED" :
+                                                   xact->state() ==
+                                                   ledger::item_t::PENDING
+                                                   ? "PENDING"
+                                                   : "UNCLEARED"));
+        transaction.Set("note", xact->note ? Napi::String::New(env, *xact->note) : env.Null());
 
         std::vector<std::string> tags_vec;
         Napi::Object metadata = Napi::Object::New(env);
-        if (xact.metadata) {
-            for (ledger::item_t::string_map::value_type pair : *xact.metadata) {
+        if (xact->metadata) {
+            for (ledger::item_t::string_map::value_type pair : *xact->metadata) {
                 if (pair.second.first) { // is metadata
                     std::ostringstream value;
                     value << *pair.second.first;
@@ -60,13 +63,23 @@ Napi::Object ParseJournalWrapped(const Napi::CallbackInfo &info) {
         }
 
         Napi::Array tags = Napi::Array::New(env, tags_vec.size());
-        for (std::vector<std::string>::iterator it = tags_vec.begin(); it != tags_vec.end(); ++it) {
-            tags[(int) std::distance(tags_vec.begin(), it)] = Napi::String::New(env, *it);
+        for (std::vector<std::string>::iterator tag_it = tags_vec.begin(); tag_it != tags_vec.end(); ++tag_it) {
+            tags[(int) std::distance(tags_vec.begin(), tag_it)] = Napi::String::New(env, *tag_it);
         }
         transaction.Set("tags", tags);
         transaction.Set("metadata", metadata);
 
-        transactions[(int) std::distance(xacts.begin(), it)] = transaction;
+        Napi::Array postings = Napi::Array::New(env, xact->posts.size());
+        for (std::list<ledger::post_t *>::iterator post_it = xact->posts.begin();
+             post_it != xact->posts.end(); ++post_it) {
+            ledger::post_t *post = *post_it;
+            Napi::Object post_js = Napi::Object::New(env);
+            post_js.Set("account", Napi::String::New(env, post->account->fullname()));
+            postings[(int) std::distance(xact->posts.begin(), post_it)] = post_js;
+        }
+        transaction.Set("postings", postings);
+
+        transactions[(int) std::distance(xacts.begin(), xact_it)] = transaction;
     }
     parsed_journal.Set("transactions", transactions);
 

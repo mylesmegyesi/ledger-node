@@ -180,4 +180,22 @@ describe("Parsing the Journal file", () => {
       "tag2": "tag2 value",
     });
   })
+
+  it("parses the posting account name", () => {
+    const journalStr = `
+2010/12/01 * Checking balance
+  Assets:Checking                   $1,000.00
+  Equity:Opening Balances
+`;
+
+    const {transactions: [{postings}]} = parseJournal(journalStr);
+
+    expect(postings).toHaveLength(2);
+    const [
+      {account: account1},
+      {account: account2},
+    ] = postings;
+    expect(account1).toEqual("Assets:Checking");
+    expect(account2).toEqual("Equity:Opening Balances");
+  });
 });
