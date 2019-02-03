@@ -1,22 +1,25 @@
-import { TransactionState } from "./TransactionState";
+import { ItemState } from "./ItemState";
 
 export type Journal = {
   transactions: Transaction[];
 }
 
-export type Transaction = {
-  payee: string,
-  code: number | null,
-  date: string,
+export type BaseItem = {
   auxDate: string | null,
-  state: TransactionState,
-  note: string | null,
-  tags: string[],
+  date: string,
   metadata: { [key: string]: string },
-  postings: Posting[],
+  note: string | null,
+  payee: string,
+  state: ItemState,
+  tags: string[],
 }
 
-export type Posting = {
+export type Transaction = BaseItem & {
+  code: number | null,
+  postings: Posting[],
+};
+
+export type Posting = BaseItem & {
   account: string,
   amount: {
     type: "amount",
@@ -25,7 +28,7 @@ export type Posting = {
     type: "balance",
     value: Amount[],
   }
-}
+};
 
 export type Amount = {
   commodity: Commodity,
@@ -39,4 +42,4 @@ export type Commodity = {
 
 export function parseJournal(journal: string): Journal;
 
-export * from "./TransactionState";
+export * from "./ItemState";
